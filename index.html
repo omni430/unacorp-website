@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="UNA Corporation(주)유나코아퍼레이션은 Fashion & Textile, Bio & Clean Energy, Low Carbon Materials, Energy Development & Trading 4개 사업 영역을 운영하는 글로벌 친환경 기업입니다."
+    />
+    <title>UNA Corporation | 4 Business Areas — 패션 · 에너지 · 소재</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Netlify Identity: /admin CMS 로그인 리다이렉트 처리 -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on('init', (user) => {
+          if (!user) {
+            window.netlifyIdentity.on('login', () => {
+              document.location.href = '/admin/'
+            })
+          }
+        })
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

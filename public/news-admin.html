@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>뉴스 관리자 — (주)유나코아퍼레이션</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Apple SD Gothic Neo',
+        'Noto Sans KR', 'Malgun Gothic', sans-serif;
+      background: #f5f5f7; color: #1d1d1f; -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+    header { margin-bottom: 28px; }
+    header .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: #6e6e73; text-transform: uppercase; }
+    header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-top: 6px; }
+    header a { color: #0066cc; text-decoration: none; font-size: 13px; }
+    .card { background: #fff; border-radius: 18px; padding: 24px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .card h2 { font-size: 17px; font-weight: 700; margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: #6e6e73; margin: 14px 0 6px; }
+    input[type="text"], input[type="date"], textarea, select {
+      width: 100%; padding: 11px 14px; border: 1px solid #d2d2d7; border-radius: 10px;
+      font-size: 14px; font-family: inherit; background: #fff; color: #1d1d1f;
+    }
+    input:focus, textarea:focus { outline: 2px solid #0071e3; outline-offset: -1px; border-color: transparent; }
+    textarea { resize: vertical; min-height: 90px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 600px) { .row { grid-template-columns: 1fr; } }
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px; border: none; cursor: pointer;
+      border-radius: 980px; padding: 11px 22px; font-size: 14px; font-weight: 600; font-family: inherit;
+      background: #0071e3; color: #fff; transition: opacity .2s;
+    }
+    .btn:hover { opacity: .85; }
+    .btn.gray { background: #e8e8ed; color: #1d1d1f; }
+    .btn.red { background: #ff3b30; }
+    .btn.sm { padding: 7px 14px; font-size: 12px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+    .guide { background: #fffbe8; border: 1px solid #f0e3b0; border-radius: 18px; padding: 20px 24px; margin-bottom: 16px; font-size: 13px; color: #6b5d1f; }
+    .guide b { color: #55490f; }
+    .guide ol { margin: 8px 0 0 18px; }
+    .news-item { border: 1px solid #e8e8ed; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+    .news-item .meta { font-size: 12px; color: #86868b; display: flex; gap: 10px; flex-wrap: wrap; }
+    .news-item .cat { color: #0066cc; font-weight: 600; }
+    .news-item h3 { font-size: 15px; font-weight: 700; margin: 6px 0 4px; }
+    .news-item p { font-size: 13px; color: #6e6e73; }
+    .news-item .btns { margin-top: 10px; display: flex; gap: 8px; }
+    .msg { font-size: 13px; color: #1d7a3d; margin-top: 10px; min-height: 18px; }
+    .danger { font-size: 12px; color: #86868b; }
+    .login-overlay {
+      position: fixed; inset: 0; background: #f5f5f7; z-index: 100;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box { background: #fff; border-radius: 18px; padding: 32px; max-width: 380px; width: 100%; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .login-box h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+    .login-box .sub { font-size: 13px; color: #6e6e73; margin-bottom: 18px; }
+    .login-err { color: #ff3b30; font-size: 12px; min-height: 18px; margin-top: 8px; }
+    .pw-row { display: flex; gap: 8px; }
+    .pw-row input { flex: 1; }
+  </style>
+</head>
+<body>
+  <!-- 관리자 암호 보호 -->
+  <div class="login-overlay" id="login-overlay">
+    <div class="login-box">
+      <div class="brand" style="font-size:12px;font-weight:700;letter-spacing:.12em;color:#6e6e73;text-transform:uppercase;margin-bottom:6px">UNA Corporation — News Admin</div>
+      <h1>관리자 로그인</h1>
+      <p class="sub">뉴스 관리 페이지는 관리자만 접근할 수 있습니다.</p>
+      <form id="login-form">
+        <label for="login-pw">암호</label>
+        <div class="pw-row">
+          <input type="password" id="login-pw" placeholder="암호 입력" autocomplete="current-password" />
+          <button type="submit" class="btn">확인</button>
+        </div>
+        <div class="login-err" id="login-err"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="wrap" id="admin-app" style="display:none">
+    <header>
+      <div class="brand">UNA Corporation — News Admin</div>
+      <h1>뉴스 관리자 페이지</h1>
+      <a href="index.html">← 홈페이지로 돌아가기</a>
+      <span style="color:#d2d2d7;margin:0 6px">|</span>
+      <a href="#" id="logout-link">로그아웃</a>
+      <div style="margin-top:10px;font-size:13px;color:#6e6e73">
+        온라인 CMS 사용: 배포 후 <a href="/admin/" style="font-size:13px">unacorporation.com/admin</a>에서 뉴스를 작성하면 방문자에게 바로 반영됩니다.
+      </div>
+    </header>
+
+    <div class="guide">
+      <b>사용 방법</b>
+      <ol>
+        <li>아래 양식으로 뉴스를 등록·수정·삭제하면 <b>이 브라우저에는 즉시 반영</b>되어 미리보기할 수 있습니다.</li>
+        <li>등록 후 <b>[JSON 낯볻기]</b> 버튼으로 파일을 저장하고, 홈페이지 담당자에게 전달하면 전 세계 방문자에게 공개됩니다. (Netlify 사용 시: 담당자가 파일을 반영해 다시 배포하면 됩니다.)</li>
+        <li>기존 파일을 받은 경우 <b>[JSON 불러오기]</b>로 목록을 그대로 복원할 수 있습니다.</li>
+      </ol>
+    </div>
+
+    <div class="card">
+      <h2 id="form-title">뉴스 등록</h2>
+      <form id="news-form">
+        <input type="hidden" id="f-id" />
+        <div class="row">
+          <div>
+            <label for="f-date">날짜</label>
+            <input type="date" id="f-date" required />
+          </div>
+          <div>
+            <label for="f-category">분류</label>
+            <input type="text" id="f-category" placeholder="예: 회사 소식, 사업, 채용" value="회사 소식" />
+          </div>
+        </div>
+        <label for="f-title">제목</label>
+        <input type="text" id="f-title" placeholder="뉴스 제목" required />
+        <label for="f-summary">요약 (목록에 표시, 1~2문장)</label>
+        <textarea id="f-summary" placeholder="뉴스 요약"></textarea>
+        <label for="f-content">본문 (클릭 시 펼쳐지는 내용)</label>
+        <textarea id="f-content" style="min-height: 140px" placeholder="뉴스 본문"></textarea>
+        <div class="actions">
+          <button type="submit" class="btn" id="submit-btn">등록하기</button>
+          <button type="button" class="btn gray" id="reset-btn">양식 비우기</button>
+        </div>
+        <div class="msg" id="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>등록된 뉴스 목록 (<span id="count">0</span>건)</h2>
+      <div id="news-list"></div>
+      <div class="actions">
+        <button type="button" class="btn" id="export-btn">JSON 낯볻기 (파일 저장)</button>
+        <label class="btn gray" style="margin: 0">JSON 불러오기
+          <input type="file" id="import-file" accept=".json,application/json" hidden />
+        </label>
+        <button type="button" class="btn red" id="clear-btn">전체 삭제</button>
+      </div>
+      <p class="danger" style="margin-top: 12px">“전체 삭제”는 이 브라우저의 저장 데이터를 지웁니다. 삭제 후 홈페이지에는 내장된 기본 뉴스가 표시됩니다.</p>
+      <div class="msg" id="list-msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>관리자 암호 변경</h2>
+      <form id="pw-form">
+        <label for="pw-current">현재 암호</label>
+        <input type="password" id="pw-current" autocomplete="current-password" />
+        <label for="pw-new">새 암호 (6자 이상)</label>
+        <input type="password" id="pw-new" autocomplete="new-password" />
+        <label for="pw-confirm">새 암호 확인</label>
+        <input type="password" id="pw-confirm" autocomplete="new-password" />
+        <div class="actions">
+          <button type="submit" class="btn gray">암호 변경</button>
+        </div>
+        <div class="msg" id="pw-msg"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    var STORAGE_KEY = 'una_news_v1';
+    var PW_KEY = 'una_admin_pw_hash';
+    var SESSION_KEY = 'una_admin_ok';
+    var DEFAULT_PW_HASH = '56368c83c3463feb4420e9377b7426a57f7ba374091a0b6f05138dc70afa1ed0';
+
+    // SHA-256 (WebCrypto 사용, 불가 시 간이 해시 폴드백)
+    function sha256(text) {
+      if (window.crypto && crypto.subtle && window.isSecureContext !== false) {
+        return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
+          return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+            return ('0' + b.toString(16)).slice(-2);
+          }).join('');
+        });
+      }
+      var h = 0x811c9dc5;
+      for (var i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+      return Promise.resolve('fnv1a-' + h.toString(16));
+    }
+
+    function getPwHash() {
+      return localStorage.getItem(PW_KEY) || DEFAULT_PW_HASH;
+    }
+
+    function unlock() {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'block';
+    }
+
+    // 로그인 상태 복원 (같은 탭 세션)
+    if (sessionStorage.getItem(SESSION_KEY) === '1') { unlock(); }
+
+    document.getElementById('login-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var pw = document.getElementById('login-pw').value;
+      sha256(pw).then(function (hash) {
+        if (hash === getPwHash()) {
+          sessionStorage.setItem(SESSION_KEY, '1');
+          unlock();
+        } else {
+          document.getElementById('login-err').textContent = '암호가 올바르지 않습니다.';
+          document.getElementById('login-pw').value = '';
+        }
+      });
+    });
+
+    document.getElementById('logout-link').addEventListener('click', function (e) {
+      e.preventDefault();
+      sessionStorage.removeItem(SESSION_KEY);
+      location.reload();
+    });
+
+    document.getElementById('pw-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var cur = document.getElementById('pw-current').value;
+      var nw = document.getElementById('pw-new').value;
+      var cf = document.getElementById('pw-confirm').value;
+      var msg = document.getElementById('pw-msg');
+      if (nw.length < 6) { msg.style.color = '#ff3b30'; msg.textContent = '새 암호는 6자 이상이어야 합니다.'; return; }
+      if (nw !== cf) { msg.style.color = '#ff3b30'; msg.textContent = '새 암호가 서로 다릅니다.'; return; }
+      sha256(cur).then(function (hash) {
+        if (hash !== getPwHash()) { msg.style.color = '#ff3b30'; msg.textContent = '현재 암호가 올바르지 않습니다.'; return; }
+        sha256(nw).then(function (newHash) {
+          localStorage.setItem(PW_KEY, newHash);
+          document.getElementById('pw-current').value = '';
+          document.getElementById('pw-new').value = '';
+          document.getElementById('pw-confirm').value = '';
+          msg.style.color = '#1d7a3d';
+          msg.textContent = '암호가 변경되었습니다. 다음 로그인부터 새 암호를 사용하세요.';
+        });
+      });
+    });
+
+    var DEFAULT_NEWS = [
+      {
+        id: 'una-20261012-1',
+        date: '2026-10-12',
+        category: '회사 소식',
+        title: '유나코아퍼레이션 공식 홈페이지 오픈',
+        summary: '4개 사업 영역과 회사 소개를 담은 공식 홈페이지를 오픈했습니다.',
+        content: '유나코아퍼레이션의 공식 홈페이지가 오픈했습니다. 홈페이지에서는 패션·텍스타일, 바이오·클린에너지, 저탄소 소재, 에너지 개발·트레이딩 4개 사업 영역을 소개하며, 회사 비전과 조직도, BioLNG 사업의 상세 정보를 확인하실 수 있습니다. 사업 관련 문의는 contact@unacorporation.com으로 연락 주시기 바랍니다.'
+      },
+      {
+        id: 'una-20261009-1',
+        date: '2026-10-09',
+        category: '조직',
+        title: '에너지사업본부 신설 및 김기동 부사장 영입',
+        summary: 'BioLNG·E-LNG, 청정수소, 청정메탄올, 청정암모니아 사업을 담당할 에너지사업본부를 신설했습니다.',
+        content: '유나코아퍼레이션이 에너지사업본부를 신설하고, 가스·에너지 분야 30년 경력의 김기동 부사장을 에너지사업본부장으로 영입했습니다. 에너지사업본부는 BioLNG·E-LNG, 청정수소, 청정메탄올, 청정암모니아 사업을 총괄하며, 탄소중립 에너지 생태계 구축을 본격적으로 추진합니다.'
+      }
+    ];
+
+    function load() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(DEFAULT_NEWS));
+    }
+
+    function save(items) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function fmt(date) { return (date || '').replace(/-/g, '.'); }
+
+    var items = load();
+
+    function render() {
+      var el = document.getElementById('news-list');
+      var sorted = items.slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      document.getElementById('count').textContent = sorted.length;
+      if (!sorted.length) {
+        el.innerHTML = '<p style="color:#86868b;font-size:13px">등록된 뉴스가 없습니다.</p>';
+        return;
+      }
+      el.innerHTML = sorted.map(function (n) {
+        return '<div class="news-item">' +
+          '<div class="meta"><span>' + esc(fmt(n.date)) + '</span><span class="cat">' + esc(n.category || '소식') + '</span></div>' +
+          '<h3>' + esc(n.title) + '</h3>' +
+          '<p>' + esc(n.summary) + '</p>' +
+          '<div class="btns">' +
+          '<button class="btn gray sm" onclick="editItem(\'' + n.id + '\')">수정</button>' +
+          '<button class="btn red sm" onclick="deleteItem(\'' + n.id + '\')">삭제</button>' +
+          '</div></div>';
+      }).join('');
+    }
+
+    function newId() {
+      return 'una-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
+    }
+
+    document.getElementById('news-form').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var id = document.getElementById('f-id').value;
+      var data = {
+        id: id || newId(),
+        date: document.getElementById('f-date').value,
+        category: document.getElementById('f-category').value.trim(),
+        title: document.getElementById('f-title').value.trim(),
+        summary: document.getElementById('f-summary').value.trim(),
+        content: document.getElementById('f-content').value.trim()
+      };
+      if (!data.date || !data.title) { return; }
+      if (id) {
+        items = items.map(function (n) { return n.id === id ? data : n; });
+        showMsg('form-msg', '수정되었습니다.');
+      } else {
+        items.push(data);
+        showMsg('form-msg', '등록되었습니다.');
+      }
+      save(items);
+      clearForm();
+      render();
+    });
+
+    function editItem(id) {
+      var n = items.filter(function (x) { return x.id === id; })[0];
+      if (!n) return;
+      document.getElementById('f-id').value = n.id;
+      document.getElementById('f-date').value = n.date;
+      document.getElementById('f-category').value = n.category || '';
+      document.getElementById('f-title').value = n.title || '';
+      document.getElementById('f-summary').value = n.summary || '';
+      document.getElementById('f-content').value = n.content || '';
+      document.getElementById('form-title').textContent = '뉴스 수정';
+      document.getElementById('submit-btn').textContent = '수정하기';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteItem(id) {
+      if (!confirm('이 뉴스를 삭제할까요?')) return;
+      items = items.filter(function (n) { return n.id !== id; });
+      save(items);
+      render();
+      showMsg('list-msg', '삭제되었습니다.');
+    }
+
+    function clearForm() {
+      document.getElementById('f-id').value = '';
+      document.getElementById('f-date').value = today();
+      document.getElementById('f-category').value = '회사 소식';
+      document.getElementById('f-title').value = '';
+      document.getElementById('f-summary').value = '';
+      document.getElementById('f-content').value = '';
+      document.getElementById('form-title').textContent = '뉴스 등록';
+      document.getElementById('submit-btn').textContent = '등록하기';
+    }
+
+    function today() {
+      var d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function showMsg(id, text) {
+      var el = document.getElementById(id);
+      el.textContent = text;
+      setTimeout(function () { el.textContent = ''; }, 3000);
+    }
+
+    document.getElementById('reset-btn').addEventListener('click', clearForm);
+
+    document.getElementById('export-btn').addEventListener('click', function () {
+      var blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'una-news.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      showMsg('list-msg', 'JSON 파일이 저장되었습니다. 담당자에게 전달해 주세요.');
+    });
+
+    document.getElementById('import-file').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error('invalid');
+          items = parsed;
+          save(items);
+          render();
+          showMsg('list-msg', '불러오기 완료 (' + items.length + '건)');
+        } catch (err) {
+          alert('올바른 JSON 파일이 아닙니다.');
+        }
+      };
+      reader.readAsText(file);
+      e.target.value = '';
+    });
+
+    document.getElementById('clear-btn').addEventListener('click', function () {
+      if (!confirm('저장된 뉴스를 모두 삭제할까요?')) return;
+      items = [];
+      save(items);
+      render();
+      showMsg('list-msg', '모두 삭제되었습니다. 홈페이지에는 기본 뉴스가 표시됩니다.');
+    });
+
+    document.getElementById('f-date').value = today();
+    render();
+  </script>
+</body>
+</html>

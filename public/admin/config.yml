@@ -1,0 +1,56 @@
+# Decap CMS (구 Netlify CMS) 설정 — 유나코아퍼레이션 뉴스 관리
+# 관리자 페이지: https://unacorporation.com/admin/
+
+backend:
+  name: git-gateway
+  branch: main # 저장소 기본 브랜치가 master이면 master로 변경
+
+# 미디어 업로드 위치 (뉴스 본문에 이미지 첨부 시)
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+# 한국어 인터페이스 (Decap CMS v3 지원)
+locale: ko
+
+collections:
+  - name: "news"
+    label: "뉴스"
+    label_singular: "뉴스"
+    description: "홈페이지 뉴스 섹션에 표시되는 소식을 관리합니다."
+    files:
+      - name: "items"
+        label: "뉴스 목록"
+        file: "src/data/news.json"
+        fields:
+          - name: "items"
+            label: "뉴스 목록"
+            widget: "list"
+            summary: "{{fields.date}} — {{fields.title}}"
+            identifier_field: "title"
+            fields:
+              - name: "id"
+                label: "ID"
+                widget: "string"
+                hint: "영문·숫자·하이픈만 사용. 예: una-20261012-1 (비워두면 제목으로 대체)"
+                required: false
+              - name: "date"
+                label: "날짜"
+                widget: "datetime"
+                date_format: "YYYY-MM-DD"
+                time_format: false
+                picker_utc: false
+              - name: "category"
+                label: "분류"
+                widget: "string"
+                hint: "예: 회사 소식, 조직, 사업, 채용"
+              - name: "title"
+                label: "제목"
+                widget: "string"
+              - name: "summary"
+                label: "요약"
+                widget: "text"
+                hint: "목록에 표시되는 한두 문장 요약"
+              - name: "content"
+                label: "본문"
+                widget: "text"
+                hint: "클릭 시 펼쳐지는 전체 내용"
