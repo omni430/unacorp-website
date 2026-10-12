@@ -50,6 +50,16 @@ collections:
                 label: "요약"
                 widget: "text"
                 hint: "목록에 표시되는 한두 문장 요약"
+              - name: "image"
+                label: "사진"
+                widget: "image"
+                required: false
+                hint: "뉴스에 표시할 사진. 업로드하면 자동으로 저장소에 등록됩니다."
+              - name: "video"
+                label: "동영상"
+                widget: "string"
+                required: false
+                hint: "유튜브 링크 또는 mp4 파일 URL을 입력하면 뉴스에 동영상이 표시됩니다."
               - name: "content"
                 label: "본문"
                 widget: "text"

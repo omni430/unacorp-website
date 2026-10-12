@@ -8,6 +8,10 @@ export type NewsItem = {
   title: string
   summary: string
   content: string
+  /** 뉴스 사진 이미지 URL (선택) */
+  image?: string
+  /** 동영상 URL — 유튜브 링크 또는 mp4 직링크 (선택) */
+  video?: string
 }
 
 export const NEWS_STORAGE_KEY = 'una_news_v1'
@@ -37,6 +41,16 @@ export function loadNews(): NewsItem[] {
 function formatDate(date: string): string {
   // YYYY-MM-DD → YYYY.MM.DD
   return (date || '').replace(/-/g, '.')
+}
+
+/** 유튜브 URL을 임베드용 URL로 변환. 유튜브가 아니면 null */
+function youtubeEmbed(url: string): string | null {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?.*v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{6,})/)
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null
+}
+
+function isMp4(url: string): boolean {
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
 }
 
 export default function News() {
@@ -106,6 +120,34 @@ export default function News() {
 
                 {open && (
                   <div className="border-t border-[#d2d2d7] px-6 py-6 md:px-7 md:pl-[8.5rem]">
+                    {item.image && (
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        loading="lazy"
+                        className="mb-5 w-full max-w-2xl rounded-2xl object-cover"
+                      />
+                    )}
+                    {item.video &&
+                      (youtubeEmbed(item.video) ? (
+                        <div className="mb-5 aspect-video w-full max-w-2xl overflow-hidden rounded-2xl bg-black">
+                          <iframe
+                            src={youtubeEmbed(item.video)!}
+                            title={item.title}
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            className="h-full w-full"
+                          />
+                        </div>
+                      ) : isMp4(item.video) ? (
+                        <video
+                          src={item.video}
+                          controls
+                          playsInline
+                          className="mb-5 w-full max-w-2xl rounded-2xl bg-black"
+                        />
+                      ) : null)}
                     <p className="whitespace-pre-line text-sm leading-loose text-[#424245] md:text-base">
                       {item.content || item.summary}
                     </p>
