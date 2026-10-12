@@ -120,8 +120,10 @@
         <textarea id="f-summary" placeholder="뉴스 요약"></textarea>
         <label for="f-content">본문 (클릭 시 펼쳐지는 내용)</label>
         <textarea id="f-content" style="min-height: 140px" placeholder="뉴스 본문"></textarea>
-        <label for="f-image">사진 URL (선택)</label>
-        <input type="text" id="f-image" placeholder="예: /uploads/photo.jpg 또는 https://..." />
+        <label for="f-image">사진 URL (선택, 최대 3장)</label>
+        <input type="text" id="f-image" placeholder="1번 사진 — 예: /uploads/photo.jpg 또는 https://..." />
+        <input type="text" id="f-image2" placeholder="2번 사진 (선택)" style="margin-top:6px" />
+        <input type="text" id="f-image3" placeholder="3번 사진 (선택)" style="margin-top:6px" />
         <label for="f-video">동영상 URL (선택 — 유튜브 링크 또는 mp4)</label>
         <input type="text" id="f-video" placeholder="예: https://www.youtube.com/watch?v=... 또는 .mp4 링크" />
         <div class="actions">
@@ -314,7 +316,11 @@
         title: document.getElementById('f-title').value.trim(),
         summary: document.getElementById('f-summary').value.trim(),
         content: document.getElementById('f-content').value.trim(),
-        image: document.getElementById('f-image').value.trim(),
+        images: [
+          document.getElementById('f-image').value.trim(),
+          document.getElementById('f-image2').value.trim(),
+          document.getElementById('f-image3').value.trim()
+        ].filter(function (u) { return u; }).slice(0, 3),
         video: document.getElementById('f-video').value.trim()
       };
       if (!data.date || !data.title) { return; }
@@ -339,7 +345,12 @@
       document.getElementById('f-title').value = n.title || '';
       document.getElementById('f-summary').value = n.summary || '';
       document.getElementById('f-content').value = n.content || '';
-      document.getElementById('f-image').value = n.image || '';
+      var imgs = [];
+      if (Array.isArray(n.images)) imgs = n.images.slice(0, 3);
+      else if (n.image) imgs = [n.image];
+      document.getElementById('f-image').value = imgs[0] || '';
+      document.getElementById('f-image2').value = imgs[1] || '';
+      document.getElementById('f-image3').value = imgs[2] || '';
       document.getElementById('f-video').value = n.video || '';
       document.getElementById('form-title').textContent = '뉴스 수정';
       document.getElementById('submit-btn').textContent = '수정하기';
@@ -362,6 +373,8 @@
       document.getElementById('f-summary').value = '';
       document.getElementById('f-content').value = '';
       document.getElementById('f-image').value = '';
+      document.getElementById('f-image2').value = '';
+      document.getElementById('f-image3').value = '';
       document.getElementById('f-video').value = '';
       document.getElementById('form-title').textContent = '뉴스 등록';
       document.getElementById('submit-btn').textContent = '등록하기';

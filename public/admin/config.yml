@@ -50,11 +50,17 @@ collections:
                 label: "요약"
                 widget: "text"
                 hint: "목록에 표시되는 한두 문장 요약"
-              - name: "image"
-                label: "사진"
-                widget: "image"
-                required: false
-                hint: "뉴스에 표시할 사진. 업로드하면 자동으로 저장소에 등록됩니다."
+              - name: "images"
+                label: "사진 (최대 3장)"
+                widget: "list"
+                min: 0
+                max: 3
+                summary: "사진 {{index}}"
+                field:
+                  name: "image"
+                  label: "사진"
+                  widget: "image"
+                hint: "뉴스에 표시할 사진을 최대 3장까지 업로드하세요."
               - name: "video"
                 label: "동영상"
                 widget: "string"

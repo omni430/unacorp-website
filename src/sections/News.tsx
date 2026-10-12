@@ -8,7 +8,9 @@ export type NewsItem = {
   title: string
   summary: string
   content: string
-  /** 뉴스 사진 이미지 URL (선택) */
+  /** 뉴스 사진 URL 목록 (최대 3장) */
+  images?: string[]
+  /** (구버전) 사진 1장 — 하위 호환용 */
   image?: string
   /** 동영상 URL — 유튜브 링크 또는 mp4 직링크 (선택) */
   video?: string
@@ -51,6 +53,13 @@ function youtubeEmbed(url: string): string | null {
 
 function isMp4(url: string): boolean {
   return /\.(mp4|webm|ogg)(\?.*)?$/i.test(url)
+}
+
+/** 뉴스 사진 목록 합치기 (구버전 image 필드 포함, 최대 3장) */
+function itemImages(item: NewsItem): string[] {
+  const list = [...(item.images ?? [])]
+  if (item.image) list.unshift(item.image)
+  return [...new Set(list.filter(Boolean))].slice(0, 3)
 }
 
 export default function News() {
@@ -120,13 +129,22 @@ export default function News() {
 
                 {open && (
                   <div className="border-t border-[#d2d2d7] px-6 py-6 md:px-7 md:pl-[8.5rem]">
-                    {item.image && (
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        loading="lazy"
-                        className="mb-5 w-full max-w-2xl rounded-2xl object-cover"
-                      />
+                    {itemImages(item).length > 0 && (
+                      <div
+                        className={`mb-5 grid max-w-2xl gap-3 ${
+                          itemImages(item).length === 1 ? 'grid-cols-1' : 'grid-cols-2'
+                        }`}
+                      >
+                        {itemImages(item).map((src, idx) => (
+                          <img
+                            key={src + idx}
+                            src={src}
+                            alt={item.title + (idx > 0 ? ` (${idx + 1})` : '')}
+                            loading="lazy"
+                            className="h-full w-full rounded-2xl object-cover"
+                          />
+                        ))}
+                      </div>
                     )}
                     {item.video &&
                       (youtubeEmbed(item.video) ? (
